@@ -1,0 +1,50 @@
+# Every morning, render today's scheduled content from content/bank/topics.yaml.
+# On Sundays it also renders the weekly YouTube video.
+# Download it from: Actions tab -> "Daily content" -> latest run -> Artifacts.
+#
+# Note: GitHub only runs scheduled workflows from the default branch (production),
+# so this starts automatically once the feature is promoted to production.
+# Until then, use "Run workflow" on the Actions tab with any branch.
+name: Daily content
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 05:30 IST every day
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Date to render (YYYY-MM-DD). Empty = today (IST)."
+        required: false
+      days:
+        description: "How many days to render, starting from that date"
+        required: false
+        default: "1"
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and Python packages
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt
+      - name: Render today's content
+        id: render
+        run: |
+          ARGS="--days ${{ github.event.inputs.days || '1' }}"
+          if [ -n "${{ github.event.inputs.date }}" ]; then ARGS="$ARGS --date ${{ github.event.inputs.date }}"; fi
+          python -m studio daily $ARGS
+          echo "stamp=$(TZ=Asia/Kolkata date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Show what to post today
+        run: |
+          for f in output/daily/*/publish.md; do echo "::group::$f"; cat "$f"; echo "::endgroup::"; done
+          { echo "## Today's content"; for f in output/daily/*/publish.md; do echo; cat "$f"; done; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: daily-${{ steps.render.outputs.stamp }}
+          path: output/daily/
+          retention-days: 30

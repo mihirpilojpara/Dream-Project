@@ -32,7 +32,7 @@ jobs:
           if [ -n "${{ github.event.inputs.script }}" ]; then
             python -m studio render "${{ github.event.inputs.script }}"
           else
-            for f in content/*.yaml; do python -m studio render "$f"; done
+            for f in content/ep*.yaml; do python -m studio render "$f"; done
           fi
       - uses: actions/upload-artifact@v4
         with:
