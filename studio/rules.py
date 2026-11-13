@@ -40,7 +40,7 @@ def check_no_links(script):
     """Return a list of (where, what, text) problems. Audio/file path fields are ignored."""
     problems = []
     for where, text in _walk(script):
-        if where.split(".")[-1] in ("music", "slug") or ".voiceover" in where:
+        if where.split(".")[-1] in ("music", "slug") or ".voiceover" in where or "._voice" in where:
             continue
         clean = HANDLE_RE.sub("", text)
         for pattern, label in LINK_PATTERNS:
