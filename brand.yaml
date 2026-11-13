@@ -1,0 +1,27 @@
+# Your brand. Every video and slide reads its colours, fonts and handle from here.
+name: AgentReady
+handle: "@agentready.in"
+website: ""              # keep empty until the product is live
+
+rules:
+  # Nothing is live yet, so videos and posts must not send people anywhere:
+  # no URLs, "visit", "link in bio", "sign up", "waitlist" or "DM to buy".
+  # Turn this off only when we have something live to point to.
+  no_links: true
+
+colors:
+  bg_top: "#0B1020"      # background gradient (top)
+  bg_bottom: "#141B3A"   # background gradient (bottom)
+  text: "#F5F7FF"
+  muted: "#A9B1D6"
+  accent: "#22D3A6"      # highlights, buttons, ticks
+  accent2: "#FFB547"
+  danger: "#FF5C7A"      # crosses, "not ready"
+  card: "#1C2550"
+  blob1: "#22D3A6"       # moving background glows
+  blob2: "#7C5CFF"
+
+fonts:                   # any .ttf/.otf file, path relative to the project folder
+  regular: assets/fonts/Poppins-Regular.ttf
+  medium: assets/fonts/Poppins-Medium.ttf
+  bold: assets/fonts/Poppins-Bold.ttf
