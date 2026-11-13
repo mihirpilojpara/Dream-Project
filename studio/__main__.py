@@ -24,6 +24,7 @@ from .brand import ROOT, load_brand
 from .linkedin import render_carousel, write_publish_notes
 from .rules import enforce
 from .compose import compose, compose_weekly, is_weekly_day, load_bank, load_schedule, topic_for
+from .voice import apply_voice, build_track, find_audio, write_voiceover
 from .video import render_still, render_video
 
 FORMAT_NAMES = {"youtube": "YouTube (16:9)", "reel": "Reel / Short (9:16)", "square": "Square post (1:1)"}
@@ -87,8 +88,21 @@ def _today(schedule):
 
 def _save_script(script, out):
     out.mkdir(parents=True, exist_ok=True)
-    (out / "script.yaml").write_text(yaml.safe_dump(script, allow_unicode=True, sort_keys=False, width=110),
+    clean = {k: v for k, v in script.items() if not k.startswith("_")}
+    (out / "script.yaml").write_text(yaml.safe_dump(clean, allow_unicode=True, sort_keys=False, width=110),
                                      encoding="utf-8")
+
+
+def _attach_voice(script, out, names, fmt="reel"):
+    write_voiceover(script, out, names[0])
+    rec = find_audio(*names)
+    if rec:
+        apply_voice(script, rec, fmt)
+        v = script["_voice"]
+        print(f"  voice: {Path(v['file']).name} ({v['seconds']}s, timed by {v['method']})")
+    else:
+        print(f"  voice: none yet. Record voiceover.txt and save it as audio/{names[0]}.m4a")
+    return rec
 
 
 def cmd_daily(args):
@@ -103,16 +117,22 @@ def cmd_daily(args):
         if topic is None:
             print(f"{date}: nothing scheduled" + (" (before start_date)" if n is None else ""))
         else:
-            script = compose(topic, brand, n)
+            script = compose(topic, brand, n, linkedin=schedule.get("linkedin", False))
             out = Path(args.out) / "daily" / f"{date}-{topic['id']}"
+            _attach_voice(script, out, [date.isoformat(), topic["id"]])
             _save_script(script, out)
             render_all(brand, script, out, no_video=args.no_video)
         if is_weekly_day(date, schedule) and not args.no_weekly:
-            weekly = compose_weekly(date, topics, schedule, brand)
+            weekly, segments = compose_weekly(
+                date, topics, schedule, brand,
+                voice_lookup=lambda d, t: find_audio(d.isoformat(), t["id"]))
             if weekly:
                 out = Path(args.out) / "daily" / f"{date}-{weekly['slug']}"
+                track = None if args.no_video else build_track(segments, out / "weekly-voice.m4a")
+                if track:
+                    weekly["voiceover"] = {"youtube": str(track)}
+                    print(f"  weekly voice: stitched {sum(1 for a, _ in segments if a)} recordings")
                 _save_script(weekly, out)
-                weekly["linkedin"] = False
                 render_all(brand, weekly, out, no_video=args.no_video)
 
 
@@ -122,10 +142,16 @@ def cmd_topic(args):
     topics = {t["id"]: t for t in load_bank()}
     if args.id not in topics:
         sys.exit(f"Unknown topic '{args.id}'. Run: python -m studio plan --all")
-    script = compose(topics[args.id], brand, 0)
+    script = compose(topics[args.id], brand, 0, linkedin=args.linkedin)
     if args.youtube:
         script["formats"] = ["reel", "youtube"]
     out = Path(args.out) / "topics" / args.id
+    if args.audio:
+        write_voiceover(script, out, args.id)
+        apply_voice(script, Path(args.audio))
+        print(f"  voice: {args.audio} ({script['_voice']['method']})")
+    else:
+        _attach_voice(script, out, [args.id])
     _save_script(script, out)
     render_all(brand, script, out, no_video=args.no_video)
 
@@ -139,13 +165,14 @@ def cmd_plan(args):
             print(f"{i:3}. [{t.get('pillar', '-'):<8}] {t['id']:<28} {t['title']}")
         return
     start = dt.date.fromisoformat(args.date) if args.date else max(_today(schedule), schedule["start_date"])
-    print(f"Bank: {len(topics)} topics · start {schedule['start_date']} · weekly YouTube on "
-          f"{schedule['weekly_youtube_day']}s\n")
+    end = f" · ends {schedule['end_date']}" if schedule.get("end_date") else ""
+    print(f"Bank: {len(topics)} topics · start {schedule['start_date']}{end} · Shorts on "
+          f"{', '.join(schedule['post_days'])} · weekly YouTube on {schedule['weekly_youtube_day']}s\n")
     for k in range(args.days):
         d = start + dt.timedelta(days=k)
         _, t = topic_for(d, topics, schedule)
-        extra = "  + weekly YouTube" if is_weekly_day(d, schedule) else ""
-        label = f"[{t.get('pillar', '-'):<8}] {t['title']}" if t else "-"
+        extra = "  + weekly YouTube (16:9)" if is_weekly_day(d, schedule) else ""
+        label = f"[{t.get('pillar', '-'):<7}] {t['title']}" if t else "(no Short)"
         print(f"{d} {d.strftime('%a')}  {label}{extra}")
 
 
@@ -261,6 +288,8 @@ def main():
     tp = sub.add_parser("topic", help="render one topic from the bank by id")
     tp.add_argument("id")
     tp.add_argument("--youtube", action="store_true", help="also render a 16:9 version")
+    tp.add_argument("--audio", help="path to a voiceover recording to time the video to")
+    tp.add_argument("--linkedin", action="store_true", help="also make a LinkedIn carousel")
     tp.add_argument("--no-video", action="store_true")
     tp.add_argument("--out", default="output")
     tp.set_defaults(fn=cmd_topic)

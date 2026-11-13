@@ -56,8 +56,8 @@ You don't write a new script every day. Ideas live in a **content bank** and a *
 
 | File | What it is |
 |---|---|
-| `content/bank/topics.yaml` | 31 ready topics (news, myths, tips, AI demos, stats, building-in-public). Add more any time. |
-| `content/schedule.yaml` | Start date, days to skip, topics pinned to a date (for breaking news), and the weekly YouTube day |
+| `content/bank/topics.yaml` | 65 ready topics in posting order, in 3 phases (news, myths, tips, AI demos, stats, common questions). Add more any time. |
+| `content/schedule.yaml` | Start/end date, posting days (Mon–Fri), days to skip, topics pinned to a date, the weekly YouTube day |
 | `studio/compose.py` | Turns a topic into a full Reel/Short, LinkedIn carousel and captions, rotating formats and CTAs |
 
 ```bash
@@ -68,7 +68,7 @@ python -m studio daily --date 2026-11-16 --days 7   # render a whole week ahead
 python -m studio topic stat-92-percent --youtube    # render any topic on demand
 ```
 
-Every day you get `output/daily/<date>-<topic>/` with `reel.mp4`, `reel-cover.png`, `linkedin/carousel.pdf`, `publish.md` (ready-to-paste captions)
+Every posting day you get `output/daily/<date>-<topic>/` with `reel.mp4`, `reel-cover.png`, `voiceover.txt`, `publish.md` (ready-to-paste captions)
 and `script.yaml` (the generated script, if you want to tweak and re-render it).
 On **Sundays** you also get a ~2-minute 16:9 **YouTube** video stitching the week's lessons together.
 
@@ -77,6 +77,16 @@ Open **Actions → Daily content → latest run**: the captions are on the summa
 Your only daily job is to post them (about 5 minutes).
 
 To add a topic, append it to `content/bank/topics.yaml`. Only `id`, `title` and `hook` are required. The comments at the top of the file list every optional field.
+
+### Your voice on every video
+
+Each day's folder has a `voiceover.txt` (also at the top of `publish.md`): one numbered line per scene.
+Record it on your phone with a ~1 second pause between lines, save it as `audio/<date>.m4a` and push it.
+The studio finds your pauses and cuts the scenes there, so each line shows while you say it. It also evens out the volume.
+The Sunday YouTube video reuses the week's recordings. See [`audio/README.md`](audio/README.md).
+
+To word a line differently, give the topic a `vo:` list with one line per scene.
+Without a recording, the video still renders, silent, at reading speed.
 
 ## 4. Writing a script by hand
 
@@ -129,12 +139,18 @@ Upload `carousel.pdf` to LinkedIn as a **document** so it becomes a swipeable ca
 
 Edit `brand.yaml` to change the name, handle, colours and fonts. Every video and slide updates automatically.
 
-## 6. Content rule: no links (yet)
+## 6. Content rules: no links, no product reveal (yet)
 
 Nothing is live yet, so our content builds attention and never sends people anywhere.
 With `rules: no_links: true` in `brand.yaml`, the studio refuses to render a script that contains a website, "visit",
 "link in bio", "sign up", "waitlist" or "buy now". Use **Follow**, **Comment** and **Save this** instead.
 Social handles like `@agentready.in` are fine. Switch the rule off only when something is actually live.
+
+`rules: no_product_reveal: true` keeps us in **stealth**: it blocks "I'm building", "our tool/app", "checker", "beta",
+"launching" and similar. Public content teaches the seller's problem and free fixes. It never describes what we're building.
+
+**The 90-day plan** (16 Nov 2026 to 14 Feb 2027) is in [`docs/90-day-plan.md`](docs/90-day-plan.md): 65 Shorts for Instagram, Facebook and YouTube,
+13 weekly YouTube videos, your weekly routine and the full calendar.
 
 ## 7. Branches & how we work
 
@@ -149,6 +165,20 @@ development  <- integration ("stage"): every feature merges here first
    ^
 feature/*    <- one branch per piece of work, opened as a PR into development
 ```
+
+## 8. YouTube agent skills
+
+`.claude/skills/yt-*` holds [youtube-agent-skill](https://github.com/Jakeschincariol/youtube-agent-skill) (MIT, by Jake Schincariol),
+installed project-local so Claude Code picks it up inside this repo. It has 11 skills: `/yt-script`, `/yt-plan`, `/yt-shorts`, `/yt-package`, `/yt-seo`,
+`/yt-retention`, `/yt-edit`, `/yt-chapters`, `/yt-comment`, `/yt-viral` and `/yt-audit`.
+Our brand voice lives in `brand/voice.md`. Copy it to `~/.claude/youtube/voice.md` so the skills use it.
+
+```bash
+python3 .claude/skills/yt-script/hookscore.py --hook "Your shop is invisible to ChatGPT"   # score a hook
+python3 .claude/skills/yt-package/title.py --title "..." --thumb "..."                    # lint title + thumbnail
+```
+
+The hook scorer is tuned for English: score the English meaning of a Hinglish hook.
 
 ## Project layout
 

@@ -234,13 +234,22 @@ class Chat(Scene):
         self.reply_h = self.pad * 2 + (self.reply_lay.height + 24 * u if self.reply_lay else 0)
         self.reply_h += sum(l.height + 22 * u for l, _ in self.items)
         self.bubble_w = bubble_w
-        self.t_reply = 0.4 + self.type_dur + 1.0
+        # Fit the animation into the scene's duration (it may be set by a voiceover).
+        self.item_gap = 0.45
+        think = 1.0
+        needed = 0.4 + self.type_dur + think + 0.5 + self.item_gap * len(self.items) + 1.6
+        k = min(1.0, max(0.35, self.duration / needed))
+        self.type_dur *= k
+        think *= k
+        self.item_gap *= k
+        self.t_type = 0.4 * k
+        self.t_reply = self.t_type + self.type_dur + think
         if dd.get("app"):
             self.add_kicker(dd["app"], align="center")
         self.add(self.user_h, self.draw_user, gap=36 * u)
         self.add(self.reply_h, self.draw_reply, gap=40 * u)
         if dd.get("missing"):
-            last = self.t_reply + 0.5 + len(self.items) * 0.45
+            last = self.t_reply + 0.5 + len(self.items) * self.item_gap
             self.add_text(dd["missing"], 48, start=last, gap=0, max_lines=3)
 
     def draw_user(self, d, y, t, op):
@@ -251,7 +260,7 @@ class Chat(Scene):
         x0 = x1 - self.bubble_w
         d.rounded_rectangle((x0, y, x1, y + self.user_h), radius=34 * self.u,
                             fill=self.b.c("accent", 0.95 * p * op))
-        shown = int(len(self.user_text) * progress(t, 0.4, self.type_dur))
+        shown = int(len(self.user_text) * progress(t, self.t_type, self.type_dur))
         lay = layout_rich(self.user_text[:shown] or " ", self.user_font, self.bubble_w - self.pad * 2, "left")
         for wd in lay.words:
             d.text((x0 + self.pad + wd.x, y + self.pad + wd.y), wd.text, font=self.user_font,
@@ -261,7 +270,7 @@ class Chat(Scene):
         u = self.u
         x0 = self.x0
         if t < self.t_reply:
-            p = enter(t, 0.4 + self.type_dur + 0.1, 0.3)
+            p = enter(t, self.t_type + self.type_dur + 0.1, 0.3)
             if p <= 0:
                 return
             d.rounded_rectangle((x0, y, x0 + 190 * u, y + 90 * u), radius=34 * u, fill=self.b.c("card", 0.9 * p * op))
@@ -279,7 +288,7 @@ class Chat(Scene):
             draw_rich(d, self.b, self.reply_lay, x0 + self.pad, cy, t, start=self.t_reply, opacity=op, stagger=0.03)
             cy += self.reply_lay.height + 24 * u
         for i, (lay, it) in enumerate(self.items):
-            start = self.t_reply + 0.5 + i * 0.45
+            start = self.t_reply + 0.5 + i * self.item_gap
             q = enter(t, start, 0.35)
             if q > 0:
                 color = "danger" if it.get("bad") else "accent"
@@ -315,7 +324,11 @@ class Compare(Scene):
             h = pad * 2 + title_lay.height + 28 * u + sum(l.height + 20 * u for l in item_lays)
             cols.append((title_lay, item_lays, h, good))
         n_left = len(cols[0][1])
-        t_right = 0.6 + n_left * 0.45 + 0.4
+        n_all = n_left + len(cols[1][1])
+        needed = 0.6 + n_left * 0.45 + 0.4 + 0.35 + len(cols[1][1]) * 0.45 + 1.4
+        k = min(1.0, max(0.35, self.duration / needed))
+        step = 0.45 * k
+        t_right = (0.6 + n_left * 0.45 + 0.4) * k
 
         def draw_col(d, x, y, col, h, start, op):
             title_lay, item_lays, _, good = col
@@ -330,7 +343,7 @@ class Compare(Scene):
                       stagger=None, color=color)
             yy += title_lay.height + 28 * u
             for i, lay in enumerate(item_lays):
-                s = start + 0.35 + i * 0.45
+                s = start + 0.35 * k + i * step
                 q = enter(t_global[0], s, 0.35)
                 if q > 0:
                     r = fs * 0.5

@@ -23,6 +23,8 @@ PILLAR_KICKERS = {
     "shift": "The shift",
     "journey": "Building in public",
     "stat": "By the numbers",
+    "qa": "Common sawaal",
+    "insight": "Seller insight",
 }
 
 # Rotated by day so CTAs vary. Follow/comment/save only: nothing is live yet.
@@ -56,7 +58,7 @@ def secs(text, base=1.6, per_word=0.30, lo=2.6, hi=6.0):
     return round(max(lo, min(hi, base + per_word * words(text))), 1)
 
 
-def compose(topic, brand, day_index=0):
+def compose(topic, brand, day_index=0, linkedin=False):
     """Topic dict -> script dict (same shape as a hand-written content/*.yaml)."""
     pillar = topic.get("pillar", "tip")
     kicker = PILLAR_KICKERS.get(pillar, pillar.title())
@@ -112,8 +114,14 @@ def compose(topic, brand, day_index=0):
         "fps": 30,
         "scenes": sc,
         "publish": _publish(topic, brand),
-        "linkedin": _linkedin(topic, brand, kicker),
+        "linkedin": _linkedin(topic, brand, kicker) if linkedin else False,
     }
+    if topic.get("vo"):
+        if len(topic["vo"]) != len(sc):
+            raise SystemExit(f"Topic '{topic['id']}': `vo` has {len(topic['vo'])} lines but the video has "
+                             f"{len(sc)} scenes. Give one line per scene.")
+        for scene, line in zip(sc, topic["vo"]):
+            scene["say"] = line
     return script
 
 
@@ -181,7 +189,14 @@ def load_schedule(path=SCHEDULE):
     data.setdefault("skip", [])
     data.setdefault("weekly_youtube_day", "sunday")
     data.setdefault("when_bank_runs_out", "repeat")
+    data["post_days"] = [d.lower()[:3] for d in data.get("post_days", WEEKDAYS)]
+    if data.get("end_date") and isinstance(data["end_date"], str):
+        data["end_date"] = dt.date.fromisoformat(data["end_date"])
     return data
+
+
+def is_post_day(date, schedule):
+    return WEEKDAYS[date.weekday()][:3] in schedule["post_days"]
 
 
 def topic_for(date, topics, schedule):
@@ -190,7 +205,7 @@ def topic_for(date, topics, schedule):
     overrides = {str(k): v for k, v in schedule["overrides"].items()}
     by_id = {t["id"]: t for t in topics}
     n = (date - schedule["start_date"]).days
-    if n < 0:
+    if n < 0 or (schedule.get("end_date") and date > schedule["end_date"]):
         return None, None
     if key in overrides:
         tid = overrides[key]
@@ -198,11 +213,14 @@ def topic_for(date, topics, schedule):
             raise SystemExit(f"schedule.yaml override {key}: unknown topic id '{tid}'")
         return n, by_id[tid]
     skipped = {str(s) for s in schedule["skip"]}
-    if key in skipped:
+    if key in skipped or not is_post_day(date, schedule):
         return n, None
-    # count only non-skipped, non-overridden days before this one
-    pos = sum(1 for i in range(n)
-              if (schedule["start_date"] + dt.timedelta(days=i)).isoformat() not in skipped | set(overrides))
+    # count earlier posting days that take the next topic from the bank
+    pos = 0
+    for i in range(n):
+        d = schedule["start_date"] + dt.timedelta(days=i)
+        if is_post_day(d, schedule) and d.isoformat() not in skipped | set(overrides):
+            pos += 1
     if pos >= len(topics):
         if schedule["when_bank_runs_out"] == "stop":
             return n, None
@@ -217,36 +235,61 @@ def is_weekly_day(date, schedule):
     return WEEKDAYS[date.weekday()] == str(schedule["weekly_youtube_day"]).lower()
 
 
-def compose_weekly(date, topics, schedule, brand):
-    """A 16:9 YouTube video stitching the last 7 days' topics into one episode."""
-    days = [date - dt.timedelta(days=i) for i in range(6, -1, -1)]
-    picked = []
-    for d in days:
-        idx, t = topic_for(d, topics, schedule)
-        if t and t["id"] not in {p["id"] for p in picked}:
-            picked.append(t)
+def week_topics(date, topics, schedule):
+    """[(date, topic), ...] posted in the 7 days ending on `date` (unique topics)."""
+    out, seen = [], set()
+    for i in range(6, -1, -1):
+        d = date - dt.timedelta(days=i)
+        _, t = topic_for(d, topics, schedule)
+        if t and t["id"] not in seen:
+            out.append((d, t))
+            seen.add(t["id"])
+    return out
+
+
+def compose_weekly(date, topics, schedule, brand, voice_lookup=None):
+    """A 16:9 YouTube video stitching the last 7 days' lessons into one episode.
+
+    voice_lookup(day, topic) -> recording path or None. Lessons with a recording reuse it
+    (minus its closing CTA line), so the weekly video needs no extra recording.
+    Returns (script, segments) where segments = [(audio_path_or_None, seconds), ...]
+    describing the soundtrack in order.
+    """
+    from .voice import apply_voice
+
+    picked = week_topics(date, topics, schedule)
     if not picked:
-        return None
+        return None, []
     week_no = max(1, (date - schedule["start_date"]).days // 7 + 1)
-    scenes = [{"type": "title", "kicker": f"AgentReady weekly · {week_no}",
-               "text": "Is hafte ki **AI shopping** seekh", "sub": f"{len(picked)} lessons for Indian sellers",
-               "duration": 4.0}]
-    for i, t in enumerate(picked, 1):
-        part = compose(t, brand, i)["scenes"][:-1]  # drop the CTA
-        part[0] = {"type": "title", "kicker": f"Lesson {i}", "text": t["hook"], "size": "l", "duration": 3.4}
-        scenes += part
-    cta = CTAS[week_no % len(CTAS)]
-    scenes.append({"type": "cta", "text": "Har hafte aisi seekh? **Subscribe** karo",
-                   "button": f"Subscribe · {brand.handle}", "sub": cta["sub"], "duration": 4.5})
-    titles = "\n".join(f"{i}. {_plain(t['title'])}" for i, t in enumerate(picked, 1))
-    return {
+    intro = {"type": "title", "kicker": f"AgentReady weekly · {week_no}",
+             "text": "Is hafte ki **AI shopping** seekh", "sub": f"{len(picked)} lessons for Indian sellers",
+             "duration": 4.0}
+    scenes, segments = [intro], [(None, 4.0)]
+    for i, (day, t) in enumerate(picked, 1):
+        part = compose(t, brand, i)
+        rec = voice_lookup(day, t) if voice_lookup else None
+        if rec:
+            apply_voice(part, rec)
+        body = part["scenes"][:-1]  # drop the CTA
+        body[0] = {**body[0], "type": "title", "kicker": f"Lesson {i}", "text": t["hook"], "size": "l"}
+        body[0].setdefault("duration", 3.4)
+        scenes += body
+        segments.append((rec, round(sum(x["duration"] for x in body), 2)))
+    outro = {"type": "cta", "text": "Har hafte aisi seekh? **Subscribe** karo",
+             "button": f"Subscribe · {brand.handle}", "sub": "Roz ek nayi AI shopping seekh", "duration": 4.5}
+    scenes.append(outro)
+    segments.append((None, 4.5))
+    titles = "\n".join(f"{i}. {_plain(t['title'])}" for i, (_, t) in enumerate(picked, 1))
+    script = {
         "title": f"AI Shopping for Indian Sellers: Week {week_no}",
         "slug": f"weekly-{week_no:02d}",
         "formats": ["youtube"],
         "fps": 30,
         "scenes": scenes,
+        "linkedin": False,
         "publish": {"youtube": {
             "title": f"AI Shopping for Indian Sellers — Week {week_no} ({len(picked)} lessons)",
-            "description": f"This week's lessons:\n{titles}\n\nNew lessons every day. Subscribe and follow {brand.handle}.",
+            "description": f"This week's lessons:\n{titles}\n\nNew lessons every week. Subscribe and follow {brand.handle}.",
             "tags": ["AI shopping", "agentic commerce", "D2C India", "ecommerce India", "UPI", "ONDC"]}},
     }
+    return script, segments

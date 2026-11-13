@@ -136,7 +136,12 @@ def write_publish_notes(script, out_dir):
     out = Path(out_dir) / "publish.md"
     pub = script.get("publish") or {}
     li = script.get("linkedin") or {}
+    vo = Path(out_dir) / "voiceover.txt"
+    if vo.exists():
+        lines_vo = [l for l in vo.read_text(encoding="utf-8").splitlines() if l[:1].isdigit()]
     lines = [f"# {script.get('title', '')}", ""]
+    if vo.exists():
+        lines += ["## Voiceover (read this, pause ~1s between lines)", ""] + lines_vo + [""]
     yt = pub.get("youtube")
     if yt:
         lines += ["## YouTube", "", f"**Title:** {yt.get('title', '')}", "", "**Description:**", "",
@@ -146,8 +151,9 @@ def write_publish_notes(script, out_dir):
     ig = pub.get("instagram")
     if ig:
         tags = " ".join("#" + h for h in ig.get("hashtags", []))
-        lines += ["## Instagram Reel / YouTube Short caption", "", ig.get("caption", "").strip(), "", tags, ""]
-    if li.get("post"):
+        lines += ["## Instagram Reel · Facebook Reel · YouTube Short caption", "", ig.get("caption", "").strip(), "",
+                  tags, ""]
+    if li and li.get("post"):
         tags = " ".join("#" + h for h in li.get("hashtags", []))
         lines += ["## LinkedIn post", "", li["post"].strip(), "", tags, "",
                   "_Attach `linkedin/carousel.pdf` as a document so it shows as a swipeable carousel._", ""]

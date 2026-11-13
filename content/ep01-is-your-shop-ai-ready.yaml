@@ -98,41 +98,5 @@ publish:
       Part 2 chahiye? Comment "READY" 👇 aur follow karo @agentready.in
     hashtags: [AgenticCommerce, D2CIndia, ShopifyIndia, EcommerceIndia, AIShopping, SmallBusinessIndia, AgentReady]
 
-linkedin:
-  post: |
-    I'm starting something new: AgentReady.
-
-    Shoppers are starting to ask AI assistants what to buy, and agents are beginning to complete purchases too. In India the payment side is moving fast: Razorpay and NPCI have already enabled agent payments, and NPCI is working on a protocol for AI agents on UPI.
-
-    Big platforms are getting ready. But what about the thousands of small D2C brands and sellers?
-
-    If an AI agent can't read your store, you don't exist to it.
-
-    I'm building a tool to fix that, and I'll share the whole journey here, in public.
-
-    If you run an online store: what would you want an AI shopping agent to know about your products? Tell me in the comments.
-  hashtags: [AgenticCommerce, D2CIndia, BuildInPublic, Ecommerce, AI]
-  carousel:
-    - type: cover
-      kicker: AgentReady · 01
-      title: Is your shop **visible to AI**?
-      sub: Why small sellers must prepare for AI shopping agents
-    - type: point
-      title: Customers are asking **AI** what to buy
-      body: Instead of searching, shoppers ask an AI assistant for "the best option under ₹1000". The AI picks for them.
-    - type: point
-      title: AI only recommends what it can **read**
-      body: Product info locked inside images or messy pages is invisible. Clean, structured data wins.
-    - type: point
-      title: Payments are getting **agent-ready**
-      body: Razorpay and NPCI already enable AI agent payments in India, and NPCI is building a protocol for agents on UPI.
-    - type: checklist
-      title: 3 things to check **today**
-      items:
-        - Price, size and stock written as text
-        - Delivery and COD info clearly shown
-        - Simple, specific product titles
-    - type: cta
-      title: Want more on **AI shopping**?
-      body: Follow along. I'm sharing what I learn every week, for Indian sellers.
-      button: Follow @agentready.in
+# LinkedIn is handled separately (career profile), so this episode makes no carousel.
+linkedin: false

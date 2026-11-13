@@ -87,7 +87,8 @@ def render_video(brand, fmt, script, out_path, fps=30, audio=None, music_volume=
     mix = []
     if voice:
         cmd += ["-i", str(voice)]
-        mix.append(f"[{idx}:a]volume=1.0[v{idx}]")
+        # Clean up phone recordings: cut rumble, even out loudness for Reels/Shorts (-16 LUFS).
+        mix.append(f"[{idx}:a]highpass=f=80,loudnorm=I=-16:TP=-1.5:LRA=11[v{idx}]")
         idx += 1
     if music:
         cmd += ["-stream_loop", "-1", "-i", str(music)]

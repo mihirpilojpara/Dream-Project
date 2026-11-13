@@ -1,20 +1,27 @@
-# Daily content calendar.
-# Day 1 posts topic #1 from content/bank/topics.yaml, day 2 posts topic #2, and so on.
-# GitHub renders today's content automatically every morning (.github/workflows/daily.yml).
+# 90-day content calendar (see docs/90-day-plan.md).
+# Each posting day takes the next topic from content/bank/topics.yaml, in order.
+# GitHub renders the day's content every morning (.github/workflows/daily.yml).
 
-start_date: 2026-11-16          # first posting day (YYYY-MM-DD)
+start_date: 2026-11-16          # Monday, week 1
+end_date: 2027-02-14            # Sunday, week 13 (90 days)
 timezone: Asia/Kolkata
 
-# A Sunday YouTube video (16:9) that stitches the week's lessons together.
+# Shorts/Reels go out Monday to Friday. Saturday is a rest day (and buffer if a day slips).
+post_days: [mon, tue, wed, thu, fri]
+
+# Sunday: a 16:9 YouTube video stitching the week's 5 lessons (reuses your recordings).
 weekly_youtube_day: sunday
 
-# What happens when every topic has been used: repeat | stop
-when_bank_runs_out: repeat
+# LinkedIn is for job/career posts, handled separately. No auto carousels.
+linkedin: false
 
-# Post a specific topic on a specific day (e.g. for breaking news):
+# After the bank is used up: repeat | stop
+when_bank_runs_out: stop
+
+# Post a specific topic on a specific day (breaking news, a great comment to answer):
 overrides: {}
-#  2026-11-20: news-upi-agent-payments
+#  2026-12-03: news-shopify-agents
 
-# Days with no post:
+# Days with no Short (travel, illness, festival):
 skip: []
 #  - 2026-12-25
