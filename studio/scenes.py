@@ -304,11 +304,12 @@ class Compare(Scene):
         gap = 40 * u
         cw = (self.cv.cw - gap) / 2 if side else self.cv.cw
         pad = 36 * u
-        fs = 38 * u
+        fs = (44 if self.cv.vertical else 38) * u
         cols = []
         for key, good in (("left", False), ("right", True)):
             col = dd.get(key, {})
-            title_lay = fit_text(self.b, col.get("title", ""), "bold", 46 * u, cw - pad * 2, 2, align="left")
+            title_lay = fit_text(self.b, col.get("title", ""), "bold", (52 if self.cv.vertical else 46) * u,
+                                 cw - pad * 2, 2, align="left")
             item_lays = [fit_text(self.b, it, "medium", fs, cw - pad * 2 - 64 * u, 3, align="left")
                          for it in col.get("items", [])]
             h = pad * 2 + title_lay.height + 28 * u + sum(l.height + 20 * u for l in item_lays)
