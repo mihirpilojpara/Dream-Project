@@ -23,6 +23,8 @@ PILLAR_KICKERS = {
     "shift": "The shift",
     "journey": "Building in public",
     "stat": "By the numbers",
+    "qa": "Common sawaal",
+    "insight": "Seller insight",
 }
 
 # Rotated by day so CTAs vary. Follow/comment/save only: nothing is live yet.
@@ -187,7 +189,14 @@ def load_schedule(path=SCHEDULE):
     data.setdefault("skip", [])
     data.setdefault("weekly_youtube_day", "sunday")
     data.setdefault("when_bank_runs_out", "repeat")
+    data["post_days"] = [d.lower()[:3] for d in data.get("post_days", WEEKDAYS)]
+    if data.get("end_date") and isinstance(data["end_date"], str):
+        data["end_date"] = dt.date.fromisoformat(data["end_date"])
     return data
+
+
+def is_post_day(date, schedule):
+    return WEEKDAYS[date.weekday()][:3] in schedule["post_days"]
 
 
 def topic_for(date, topics, schedule):
@@ -196,7 +205,7 @@ def topic_for(date, topics, schedule):
     overrides = {str(k): v for k, v in schedule["overrides"].items()}
     by_id = {t["id"]: t for t in topics}
     n = (date - schedule["start_date"]).days
-    if n < 0:
+    if n < 0 or (schedule.get("end_date") and date > schedule["end_date"]):
         return None, None
     if key in overrides:
         tid = overrides[key]
@@ -204,11 +213,14 @@ def topic_for(date, topics, schedule):
             raise SystemExit(f"schedule.yaml override {key}: unknown topic id '{tid}'")
         return n, by_id[tid]
     skipped = {str(s) for s in schedule["skip"]}
-    if key in skipped:
+    if key in skipped or not is_post_day(date, schedule):
         return n, None
-    # count only non-skipped, non-overridden days before this one
-    pos = sum(1 for i in range(n)
-              if (schedule["start_date"] + dt.timedelta(days=i)).isoformat() not in skipped | set(overrides))
+    # count earlier posting days that take the next topic from the bank
+    pos = 0
+    for i in range(n):
+        d = schedule["start_date"] + dt.timedelta(days=i)
+        if is_post_day(d, schedule) and d.isoformat() not in skipped | set(overrides):
+            pos += 1
     if pos >= len(topics):
         if schedule["when_bank_runs_out"] == "stop":
             return n, None

@@ -165,13 +165,14 @@ def cmd_plan(args):
             print(f"{i:3}. [{t.get('pillar', '-'):<8}] {t['id']:<28} {t['title']}")
         return
     start = dt.date.fromisoformat(args.date) if args.date else max(_today(schedule), schedule["start_date"])
-    print(f"Bank: {len(topics)} topics · start {schedule['start_date']} · weekly YouTube on "
-          f"{schedule['weekly_youtube_day']}s\n")
+    end = f" · ends {schedule['end_date']}" if schedule.get("end_date") else ""
+    print(f"Bank: {len(topics)} topics · start {schedule['start_date']}{end} · Shorts on "
+          f"{', '.join(schedule['post_days'])} · weekly YouTube on {schedule['weekly_youtube_day']}s\n")
     for k in range(args.days):
         d = start + dt.timedelta(days=k)
         _, t = topic_for(d, topics, schedule)
-        extra = "  + weekly YouTube" if is_weekly_day(d, schedule) else ""
-        label = f"[{t.get('pillar', '-'):<8}] {t['title']}" if t else "-"
+        extra = "  + weekly YouTube (16:9)" if is_weekly_day(d, schedule) else ""
+        label = f"[{t.get('pillar', '-'):<7}] {t['title']}" if t else "(no Short)"
         print(f"{d} {d.strftime('%a')}  {label}{extra}")
 
 
