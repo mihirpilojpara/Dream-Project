@@ -204,25 +204,57 @@ def fit_text(brand, text, weight, size, max_w, max_lines=4, min_size=28, align="
         s = int(s * 0.92)
 
 
+def _hl_runs(lay):
+    """Group consecutive highlighted words on the same line: [(first_word, last_word), ...]."""
+    runs, cur = [], None
+    for wd in lay.words:
+        if wd.hl and cur and cur[1].y == wd.y and cur[1].index == wd.index - 1:
+            cur = (cur[0], wd)
+        else:
+            if cur:
+                runs.append(cur)
+            cur = (wd, wd) if wd.hl else None
+    if cur:
+        runs.append(cur)
+    return runs
+
+
 def draw_rich(d, brand, lay, x0, y0, t, start=0.0, opacity=1.0, stagger=0.06,
-              color="text", hl_color="accent", marker=True, rise=0.32):
-    """Draw a TextLayout with a word-by-word reveal starting at `start` seconds."""
+              color="text", hl_color="accent", marker=None, rise=0.32):
+    """Draw a TextLayout with a word-by-word reveal starting at `start` seconds.
+
+    Highlighted (**word**) text is drawn in the accent colour. With brand
+    `highlight: underline`, each highlighted phrase also gets one continuous
+    underline placed below the letters (never through them)."""
     font = lay.font
     size = font.size
+    style = marker if marker is not None else getattr(brand, "highlight", "color")
+
+    def word_p(wd):
+        if stagger is None:
+            return enter(t, start, 0.45)
+        return enter(t, start + wd.index * stagger, 0.42)
+
+    if style == "underline":
+        asc, desc = font.getmetrics()
+        for first, last in _hl_runs(lay):
+            p = enter(t, start + (last.index * stagger if stagger is not None else 0) + 0.2, 0.45)
+            if p <= 0:
+                continue
+            x_a = x0 + first.x
+            x_b = x0 + last.x + last.w
+            y = y0 + first.y + asc + desc + size * 0.06
+            h = max(3, size * 0.075)
+            d.rounded_rectangle((x_a, y, x_a + (x_b - x_a) * p, y + h), radius=h / 2,
+                                fill=brand.c(hl_color, 0.95 * p * opacity))
+
     for wd in lay.words:
-        p = enter(t, start + wd.index * stagger, 0.42) if stagger is not None else enter(t, start, 0.45)
+        p = word_p(wd)
         if p <= 0:
             continue
-        a = p * opacity
         dy = (1 - p) * size * rise
-        x, y = x0 + wd.x, y0 + wd.y + dy
-        if wd.hl and marker:
-            mp = enter(t, start + wd.index * stagger + 0.25, 0.4) if stagger is not None else p
-            bar_top = y + size * 0.86
-            d.rounded_rectangle(
-                (x - size * 0.06, bar_top, x - size * 0.06 + (wd.w + size * 0.12) * mp, bar_top + size * 0.2),
-                radius=size * 0.08, fill=brand.c(hl_color, 0.28 * a))
-        d.text((x, y), wd.text, font=font, fill=brand.c(hl_color if wd.hl else color, a))
+        d.text((x0 + wd.x, y0 + wd.y + dy), wd.text, font=font,
+               fill=brand.c(hl_color if wd.hl else color, p * opacity))
 
 
 # ---------------------------------------------------------------- shapes & icons

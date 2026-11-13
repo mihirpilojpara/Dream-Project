@@ -14,6 +14,7 @@ DEFAULTS = {
     "handle": "@agentready.in",
     "website": "",
     "rules": {"no_links": True},
+    "highlight": "color",
     "colors": {
         "bg_top": "#0B1020",
         "bg_bottom": "#141B3A",
@@ -47,6 +48,7 @@ class Brand:
     colors: dict = field(default_factory=dict)
     fonts: dict = field(default_factory=dict)
     rules: dict = field(default_factory=dict)
+    highlight: str = "color"
 
     def c(self, key, alpha=1.0):
         """Color as an RGBA tuple with the given opacity (0..1)."""
