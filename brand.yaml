@@ -8,6 +8,9 @@ rules:
   # no URLs, "visit", "link in bio", "sign up", "waitlist" or "DM to buy".
   # Turn this off only when we have something live to point to.
   no_links: true
+  # Stealth: teach the problem publicly, never describe the product we're building
+  # (blocks "I'm building", "our tool/app", "checker", "beta", "launching"...).
+  no_product_reveal: true
 
 # How **highlighted** words look: color (accent colour only) | underline (plus a clean line below)
 highlight: color

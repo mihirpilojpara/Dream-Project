@@ -13,7 +13,7 @@ DEFAULTS = {
     "name": "AgentReady",
     "handle": "@agentready.in",
     "website": "",
-    "rules": {"no_links": True},
+    "rules": {"no_links": True, "no_product_reveal": True},
     "highlight": "color",
     "colors": {
         "bg_top": "#0B1020",
