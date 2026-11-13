@@ -78,6 +78,16 @@ Your only daily job is to post them (about 5 minutes).
 
 To add a topic, append it to `content/bank/topics.yaml`. Only `id`, `title` and `hook` are required. The comments at the top of the file list every optional field.
 
+### Your voice on every video
+
+Each day's folder has a `voiceover.txt` (also at the top of `publish.md`): one numbered line per scene.
+Record it on your phone with a ~1 second pause between lines, save it as `audio/<date>.m4a` and push it.
+The studio finds your pauses and cuts the scenes there, so each line shows while you say it. It also evens out the volume.
+The Sunday YouTube video reuses the week's recordings. See [`audio/README.md`](audio/README.md).
+
+To word a line differently, give the topic a `vo:` list with one line per scene.
+Without a recording, the video still renders, silent, at reading speed.
+
 ## 4. Writing a script by hand
 
 A script is a YAML file in `content/`. Each scene is one animated "slide". Words in `**double stars**` get the accent colour and a highlighter.
