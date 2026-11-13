@@ -1,0 +1,499 @@
+# AgentReady content bank — one topic per day.
+#
+# The studio turns each topic into a full Reel/Short + LinkedIn carousel + captions
+# automatically (see studio/compose.py). You don't write scenes here, just ideas.
+#
+# Fields (all optional except id, title, hook):
+#   pillar     label shown on screen: news | myth | tip | demo | shift | journey | stat
+#   hook       first 3 seconds (Hinglish works best on Reels)
+#   myth/fact  for myth-busting topics
+#   news       one-line news summary
+#   chat       {user, items, missing} -> animated AI-assistant chat
+#   stat       {value, label, source} -> counting number
+#   point      the one idea of the video (+ point_sub)
+#   compare    {left: {title, items}, right: {title, items}}
+#   heading + items -> checklist / steps   (icon: check | cross | number | arrow)
+#   caption    Instagram / Shorts caption (auto-made if missing)
+#   linkedin   LinkedIn post text (auto-made if missing)
+#
+# Rule: nothing is live yet. Never write links, "visit", "sign up", "waitlist", "buy now".
+# Facts must have a real source. Add new topics at the end; the calendar picks them up.
+
+topics:
+
+  # ---------------------------------------------------------------- week 1
+  - id: ai-asks-not-searches
+    pillar: shift
+    title: Customers now ask AI what to buy
+    hook: Aapki shop **ChatGPT** ko dikhti hai?
+    chat:
+      user: Best cotton kurta under ₹1000 batao, jaldi delivery chahiye
+      items: ["Flipkart · 1-day delivery", "Big brand store · 4.5 rating", "Another big seller · COD available"]
+      missing: Aapki shop? **List mein hi nahi.**
+    point: AI sirf woh shops recommend karta hai jinka data woh **padh sake**
+    heading: 3 cheezein aaj hi check karo
+    items:
+      - Har product ka **price, size, stock** text mein likha ho
+      - Delivery aur **COD info** clear ho
+      - Product titles simple aur **specific** ho
+    linkedin: |
+      Shoppers are starting to ask AI assistants what to buy, instead of searching.
+      And an AI assistant can only recommend what it can read.
+
+      If your price, size, stock and delivery details are locked inside images or messy pages, you are invisible to it.
+
+      Three things every online seller can check today:
+      1. Price, size and stock written as text
+      2. Delivery and COD info clearly stated
+      3. Simple, specific product titles
+
+  - id: stat-92-percent
+    pillar: stat
+    title: 92% of shoppers in India's metros have used AI while shopping
+    hook: Yeh number **ignore mat karna**
+    stat: { value: 92%, label: shoppers have **already used AI** while shopping, source: "NielsenIQ, Agentic Commerce India 2026 (top 8 metros)" }
+    point: Sawaal yeh nahi ki AI shopping aayegi. Sawaal yeh hai ki **aapki shop ready hai?**
+    linkedin: |
+      92% of consumers in India's top 8 metros have already used AI while shopping (NielsenIQ, Agentic Commerce India 2026).
+
+      AI is no longer a side channel for discovery. It is becoming the first step.
+
+      The question for small sellers isn't "will AI shopping come?" It's "will AI find my products when it does?"
+
+  - id: myth-only-big-brands
+    pillar: myth
+    title: "Myth: AI shopping is only for big brands"
+    hook: AI shopping sirf **bade brands** ke liye hai?
+    myth: AI agents sirf Amazon aur Flipkart jaise bade platforms se khareedenge
+    fact: AI agent ko **brand size se farak nahi padta**. Use clear, readable data chahiye.
+    heading: Chhote seller ka advantage
+    items:
+      - Aap jaldi **change** kar sakte ho
+      - Aapka product **niche** aur specific hai
+      - Clean data se aap bhi **recommend** ho sakte ho
+    linkedin: |
+      Myth: AI shopping agents will only buy from the biggest platforms.
+
+      Reality: an agent picks what best matches the request, using data it can read and trust. Size alone doesn't win. Clarity does.
+
+      Small sellers have an edge here: they can fix their product data this week, not next quarter.
+
+  - id: news-upi-agent-payments
+    pillar: news
+    title: AI agents are learning to pay with UPI
+    hook: AI ab **UPI se payment** bhi karega?
+    news: Razorpay aur NPCI ne Feb 2026 mein Claude par **agentic payments** launch kiye. Zomato, Swiggy, Zepto pehle partners the.
+    point: Matlab AI sirf suggest nahi karega, **order bhi karega**
+    point_sub: Aur NPCI agents ke liye ek common UPI protocol par kaam kar raha hai (reported)
+    heading: Seller ke liye matlab
+    items:
+      - Payment ka **friction** kam hoga
+      - Jo shops agent-ready hongi, unhe **pehle orders** milenge
+      - Abhi se data **saaf** karna shuru karo
+    linkedin: |
+      In February 2026, Razorpay and NPCI launched agentic payments on Claude, with Zomato, Swiggy and Zepto as the first partners. Users can complete orders inside an AI conversation, on UPI.
+
+      NPCI is also reported to be working on a Unified Agent Protocol so verified AI agents can make UPI payments within limits users set.
+
+      For sellers, this means AI won't just recommend. It will complete the order. Stores that agents can read and trust will get those orders first.
+
+  - id: tip-product-titles
+    pillar: tip
+    title: Write product titles an AI can understand
+    hook: Aapka product title **AI ko confuse** kar raha hai
+    compare:
+      left: { title: Confusing title, items: ["Summer Special Mega Combo!!!", "Best Quality Product", "New Arrival 2026"] }
+      right: { title: AI-friendly title, items: ["Women's cotton kurta, blue, size M", "Steel water bottle, 1 litre, insulated", "Men's running shoes, size 9, grey"] }
+    point: Title mein likho **kya hai, kiske liye, kaunsa size/colour**
+    heading: Perfect title formula
+    items:
+      - "**Product type** + material"
+      - "**Kiske liye** (men, women, kids)"
+      - "**Size / colour / quantity**"
+    linkedin: |
+      "Summer Special Mega Combo!!!" might work in an Instagram ad. To an AI shopping agent, it means nothing.
+
+      A title an agent can match to a request looks like: "Women's cotton kurta, blue, size M".
+
+      Formula: product type + material + who it's for + size/colour/quantity.
+
+  - id: journey-day-1
+    pillar: journey
+    title: Why I'm building AgentReady
+    hook: Main **AgentReady** kyun bana raha hoon
+    point: Bade platforms AI ke liye ready ho rahe hain. **Chhote sellers peeche reh jayenge.**
+    heading: Mera plan
+    items:
+      - Har din AI shopping par **ek seekh** share karna
+      - Indian sellers ki **asli problems** samajhna
+      - Ek simple tool banana jo shops ko **AI-ready** kare
+    linkedin: |
+      Day 1 of building AgentReady, in public.
+
+      Why: shoppers are starting to ask AI what to buy, and AI agents are starting to pay via UPI. Big platforms are getting ready. Thousands of small Indian sellers aren't.
+
+      What I'll do here: share one lesson a day about AI shopping, talk to sellers about their real problems, and build a simple tool that makes a store readable by AI agents.
+
+      If you sell online, I'd love to hear: what confuses you most about AI and shopping?
+
+  - id: week1-recap-checklist
+    pillar: tip
+    title: "Weekly checklist: is your store AI-ready?"
+    hook: 5 minute ka **AI-ready test**
+    heading: Apni shop check karo
+    items:
+      - Price aur stock **text** mein hai, image mein nahi
+      - Har product ka **clear title**
+      - Size chart aur **material** likha hai
+      - Delivery time aur **COD** clear hai
+      - Return policy **simple** shabdon mein hai
+    point: Jitne zyada **tick**, utna zyada AI aapko **samjhega**
+    linkedin: |
+      A 5-minute AI-readiness test for your store:
+
+      - Price and stock written as text, not inside images
+      - Clear, specific product titles
+      - Size chart and material stated
+      - Delivery time and COD clearly mentioned
+      - Return policy in simple words
+
+      Every tick makes your products easier for an AI agent to understand and recommend.
+
+  # ---------------------------------------------------------------- week 2
+  - id: news-ondc-merchants
+    pillar: news
+    title: ONDC crossed 2 lakh active retail merchants
+    hook: ONDC par **2 lakh+ sellers** aa chuke hain
+    stat: { value: "200,000+", label: retail merchants **active on ONDC** by July 2026, source: "DPIIT figures, July 2026" }
+    point: Open network + AI agents = **chhote sellers ke liye naya raasta**
+    point_sub: Ek app se kharido, doosre network par baithe seller se
+    linkedin: |
+      By July 2026, more than 200,000 retail merchants were active on ONDC, according to DPIIT figures, and the network passed 500 million transactions.
+
+      Why it matters for AI shopping: an open network means an AI agent in one app can, in principle, find and buy from a seller connected through another.
+
+      For small sellers, that's a path to discovery that doesn't depend only on marketplace ranking.
+
+  - id: myth-images-are-enough
+    pillar: myth
+    title: "Myth: good photos are enough"
+    hook: Sirf **achhi photos** kaafi hain?
+    myth: Photo achhi hai toh product bik jayega
+    fact: AI agent pehle **text padhta hai**. Photo mein likha price ya size use samajh nahi aata.
+    heading: Photo ke saath yeh bhi likho
+    items:
+      - "**Price** aur offer text mein"
+      - "**Size, colour, material** text mein"
+      - Photo ka **alt text** (photo kya dikha rahi hai)
+    linkedin: |
+      Great product photos sell to humans. But an AI agent reads text first.
+
+      If your price, size or offer only appears inside an image, the agent may never see it.
+
+      Keep the photos, and also write price, size, colour and material as text, plus a short alt text describing each image.
+
+  - id: tip-size-charts
+    pillar: tip
+    title: Size charts AI agents can read
+    hook: '"Kya yeh **mujhe fit** hoga?" AI bhi yahi puchta hai'
+    point: Size chart **image mein nahi**, text table mein do
+    heading: Ek achha size chart
+    items:
+      - Har size ke **cm / inch** measurements
+      - "**Fit type**: regular, slim, oversized"
+      - "**Model ka size** aur height"
+    linkedin: |
+      "Will this fit me?" is one of the first questions a shopper asks, and one an AI agent has to answer for them.
+
+      If your size chart is an image, the agent can't read it. Put it in a text table with measurements, fit type, and the model's size and height.
+
+  - id: demo-gift-search
+    pillar: demo
+    title: How an AI picks a gift
+    hook: Dekho AI **gift kaise choose** karta hai
+    chat:
+      user: Meri mummy ke liye ₹1500 tak ka gift, Sunday tak delivery chahiye
+      items: ["Silk saree · delivery by Friday", "Brass diya set · gift wrap included", "Skincare hamper · COD available"]
+      missing: AI ne **delivery date aur gift wrap** dekha. Aapki listing mein likha hai?
+    point: AI sirf product nahi, **poori detail** match karta hai
+    heading: Gifting season ke liye likho
+    items: ["Delivery **kab tak** pahunchegi", "Gift wrap **available** hai ya nahi", "**Kiske liye** perfect hai"]
+    linkedin: |
+      Watch what an AI assistant checks when someone asks for "a gift for my mother under ₹1500, delivered by Sunday":
+
+      Price, yes. But also delivery date, gift wrapping and who the product is for.
+
+      If your listing doesn't state those, the agent can't match you, even if your product is perfect.
+
+  - id: stat-cod-small-towns
+    pillar: stat
+    title: COD still matters in small-town India
+    hook: Small towns mein **COD** abhi bhi king hai
+    stat: { value: 70%, label: of small-town shoppers **prefer COD**, source: "Base, D2C Ecommerce in India 2026 report" }
+    point: AI agent ko batao ki aap **COD dete ho**, warna woh aapko skip karega
+    linkedin: |
+      Around 70% of shoppers in small-town India still prefer cash on delivery (Base, D2C Ecommerce in India 2026).
+
+      When an AI agent shops for someone who needs COD, it will filter out stores that don't clearly say they offer it.
+
+      Payment options aren't a footer detail anymore. They're a matching criterion.
+
+  - id: journey-what-sellers-said
+    pillar: journey
+    title: What I'm learning from sellers
+    hook: Sellers se baat karke **yeh samjha**
+    point: Zyada sellers ko pata hi nahi ki AI unki shop **kaise dekhta hai**
+    heading: Sabse common problems
+    icon: cross
+    items:
+      - Product info **images** mein band hai
+      - Har jagah **alag price** likha hai
+      - Stock **update** nahi hota
+    linkedin: |
+      Building AgentReady in public, week 2.
+
+      The most common problems I keep seeing in small online stores:
+      - Product details locked inside images
+      - Different prices in different places
+      - Stock that isn't kept up to date
+
+      None of these are hard to fix. Most sellers just don't know how an AI reads their store. That's the gap I want to close.
+
+  - id: tip-consistent-prices
+    pillar: tip
+    title: One price everywhere
+    hook: Alag-alag **price** = AI ka trust khatam
+    compare:
+      left: { title: Confusing, items: ["Website: ₹999", "Instagram: ₹899", "WhatsApp: price on request"] }
+      right: { title: Trustworthy, items: ["Everywhere: ₹999", "Offer clearly mentioned", "Same stock info everywhere"] }
+    point: AI agent **conflicting data** waali shop ko recommend karne se bachta hai
+    linkedin: |
+      If your website says ₹999, Instagram says ₹899 and WhatsApp says "price on request", a human might DM you. An AI agent will likely move on.
+
+      Consistent price, stock and offer details across every channel are a trust signal, for people and for agents.
+
+  # ---------------------------------------------------------------- week 3
+  - id: news-google-flipkart
+    pillar: news
+    title: Google brings AI agent shopping to India with Flipkart
+    hook: Google + Flipkart = **AI se shopping**
+    news: Google apna Universal Commerce Protocol India mein **Flipkart ke saath** la raha hai. AI Mode aur Gemini se products khareede ja sakenge.
+    point: Bade platforms ready ho rahe hain. **Aapka D2C store?**
+    heading: Aaj kya karein
+    items: ["Product data **clean** karo", "Har listing mein **delivery + returns** likho", "Apne best products ki **details poori** karo"]
+    linkedin: |
+      Google is bringing its Universal Commerce Protocol to India with Flipkart as its first partner here, so shoppers will be able to buy Flipkart products through AI agents in Search's AI Mode and the Gemini app.
+
+      Big platforms are getting agent-ready. The question for independent D2C brands: when an agent compares you with a marketplace listing, does it have enough information about your product to choose you?
+
+  - id: myth-ai-will-replace-sellers
+    pillar: myth
+    title: "Myth: AI will replace sellers"
+    hook: Kya AI **sellers ko khatam** kar dega?
+    myth: AI agents aayenge toh chhote sellers ka business band
+    fact: AI **kharidne ka tareeka** badlega, bechne waale nahi. Jo seller ready hoga, use **zyada customers** milenge.
+    point: Darr nahi, **taiyari** chahiye
+    linkedin: |
+      AI agents won't replace sellers. They change how buying happens: who discovers what, and how the order gets placed.
+
+      Sellers who make their products easy for agents to understand will reach customers they never could before. It's a preparation problem, not a survival one.
+
+  - id: tip-return-policy
+    pillar: tip
+    title: A return policy AI can explain
+    hook: Return policy **samajh nahi aayi** toh order nahi
+    point: Return policy **3 lines** mein, simple shabdon mein
+    heading: Teen cheezein zaroor likho
+    items: ["**Kitne din** mein return", "Refund **kaise** milega", "Kaun se products **return nahi** honge"]
+    linkedin: |
+      Shoppers ask an AI assistant "Can I return it if it doesn't fit?" The agent answers from your return policy.
+
+      If it's a long legal page, the agent may not find the answer. Keep three things clear: how many days, how the refund works, and what can't be returned.
+
+  - id: stat-ai-agents-interest
+    pillar: stat
+    title: 60% of Indian consumers are interested in a personal AI agent
+    hook: Har **10 mein se 6** log chahte hain apna AI agent
+    stat: { value: 60%, label: of Indian consumers are **interested in a personal AI agent**, source: "Adobe 2026 AI and Digital Trends research" }
+    point: Kal ka customer **khud nahi**, uska AI agent aapki shop dekhega
+    linkedin: |
+      Adobe's 2026 AI and Digital Trends research found 60% of Indian consumers were interested in creating a personal AI agent, and 55% would interact with an agent offered by a brand.
+
+      Tomorrow's first visitor to your store may not be the customer. It may be their agent.
+
+  - id: demo-delivery-pincode
+    pillar: demo
+    title: Why AI asks for your pin code
+    hook: AI ne **pin code** kyun pucha?
+    chat:
+      user: Kal tak Indore mein delivery ho sake, aisa running shoe batao
+      items: ["Brand A · delivers tomorrow", "Brand B · 2-day delivery", "Brand C · delivery info missing"]
+      missing: Delivery info nahi? **AI skip kar deta hai.**
+    point: Delivery **pin code aur time** clear likho
+    linkedin: |
+      "Running shoes delivered to Indore by tomorrow." A request like this filters stores by delivery promise before it looks at the product.
+
+      If your delivery areas and times aren't stated clearly, the agent can't include you, so it skips you.
+
+  - id: journey-building-checker
+    pillar: journey
+    title: Building the AI-readiness checker
+    hook: Main ek **AI-readiness checker** bana raha hoon
+    point: Ek scan, aur pata chale ki AI aapki shop ko **kitna samajhta hai**
+    heading: Yeh check karega
+    items: ["Product titles aur **details**", "Price aur stock ka **data**", "Delivery, COD aur **returns** info"]
+    linkedin: |
+      Building AgentReady, week 3: I've started on the core idea, an AI-readiness checker.
+
+      It will look at a store the way an AI agent does and score what it can and can't understand: titles and details, price and stock data, and delivery, COD and returns info.
+
+      Still early. If you run an online store, what would you want a score like this to tell you?
+
+  - id: tip-faq-section
+    pillar: tip
+    title: An FAQ section answers the AI's questions
+    hook: Customer ke **sawaal pehle se** answer karo
+    point: Har product par **5 common sawaal** aur unke jawab likho
+    heading: Common sawaal
+    items: ["Kya yeh **washable** hai?", "Warranty **kitni** hai?", "Box mein **kya-kya** milega?"]
+    linkedin: |
+      AI agents answer shoppers' questions on the spot. If the answer is already on your product page, the agent can use it.
+
+      Add a short FAQ to every product: is it washable, what's the warranty, what's in the box. Five questions, five clear answers.
+
+  # ---------------------------------------------------------------- week 4
+  - id: news-pine-labs-p3p
+    pillar: news
+    title: Pine Labs launched an agentic payment protocol on UPI
+    hook: AI **ek baar permission** lekar payment karega
+    news: Pine Labs ne June 2026 mein **P3P** launch kiya. AI agents ek upfront authorisation ke baad UPI payments complete kar sakte hain.
+    point: Payment ka last step bhi **AI ke haath** mein aa raha hai
+    linkedin: |
+      In June 2026 Pine Labs launched P3P, an agentic payment protocol built on UPI. It lets AI agents complete UPI payments after a single upfront authorisation.
+
+      Discovery, comparison and now payment: each step of shopping is becoming something an agent can do. Stores need to be ready at every step.
+
+  - id: myth-only-english
+    pillar: myth
+    title: "Myth: AI only understands English listings"
+    hook: AI sirf **English** samajhta hai?
+    myth: Hindi ya regional bhasha mein likha toh AI nahi samjhega
+    fact: Aaj ke AI assistants **kai Indian bhashaon** mein kaam karte hain. Zaroori hai **clear aur complete** likhna.
+    point: Apne customer ki **bhasha** mein, saaf likho
+    linkedin: |
+      Modern AI assistants work across many Indian languages. What matters most isn't the language. It's whether the information is clear and complete.
+
+      Write in the language your customers use, and make sure the key facts are there: price, size, delivery, returns.
+
+  - id: tip-stock-updates
+    pillar: tip
+    title: Out-of-stock is the fastest way to lose an AI's trust
+    hook: '"In stock" likha, par **mila nahi**?'
+    point: Galat stock info = AI agent ka **trust khatam**
+    heading: Stock ko sahi rakho
+    items: ["Har din **stock update** karo", "Out of stock products **mark** karo", "Restock date **likho** agar pata hai"]
+    linkedin: |
+      An agent that orders an item marked "in stock" and gets a cancellation learns not to trust that store.
+
+      Keep stock accurate daily, clearly mark items as out of stock, and add a restock date when you know it.
+
+  - id: stat-d2c-small-cities
+    pillar: stat
+    title: Most new D2C orders now come from smaller cities
+    hook: Naye orders **chhote shehron** se aa rahe hain
+    stat: { value: 66%, label: of new D2C orders came from **tier 2 and 3 cities** in FY26, source: "Unicommerce report" }
+    point: In customers ke liye **COD, delivery aur bhasha** ki info sabse zaroori
+    linkedin: |
+      66% of new D2C orders in FY26 came from tier 2 and tier 3 cities, according to Unicommerce.
+
+      These shoppers often care most about COD, delivery time and language. As AI assistants spread, those details become the filters that decide which stores get shown.
+
+  - id: demo-compare-two-stores
+    pillar: demo
+    title: Two stores, same product. Who does the AI pick?
+    hook: Same product, **AI ne ek hi chuna**. Kyun?
+    compare:
+      left: { title: Store A, items: ["Price sirf image mein", "Size chart missing", "Delivery time nahi likha"] }
+      right: { title: Store B, items: ["Price aur stock text mein", "Size chart table mein", "Delivery: 2 din, COD available"] }
+    point: Product same tha. **Information alag thi.**
+    linkedin: |
+      Two stores, same product, same price. The AI assistant recommended only one.
+
+      Store A: price only in the image, no size chart, no delivery time.
+      Store B: price and stock as text, size chart in a table, delivery and COD clearly stated.
+
+      The product was the same. The information wasn't.
+
+  - id: journey-month-1
+    pillar: journey
+    title: One month of building in public
+    hook: Ek mahina, **roz ek video**
+    point: Sabse badi seekh? Sellers **seekhna chahte hain**, bas koi simple bataye
+    heading: Agle mahine
+    items: ["Checker ka **pehla version**", "Sellers ke **real examples**", "AI shopping ki **India updates**"]
+    linkedin: |
+      One month of building AgentReady in public, one post a day.
+
+      Biggest lesson: sellers want to get ready for AI shopping. They just need someone to explain it simply, without jargon.
+
+      Next month: the first version of the checker, real seller examples, and the India updates that matter.
+
+  - id: tip-reviews
+    pillar: tip
+    title: Reviews are data too
+    hook: Reviews sirf customers ke liye **nahi hain**
+    point: AI agents bhi reviews padhkar **quality samajhte** hain
+    heading: Reviews badhao
+    items: ["Delivery ke baad **review ka message** bhejo", "Photo reviews ko **encourage** karo", "Negative review ka **politely jawab** do"]
+    linkedin: |
+      Reviews aren't only for shoppers. AI assistants read them to judge quality and fit.
+
+      Ask for a review after delivery, encourage photo reviews, and reply politely to negative ones. Each reply is also information the agent can use.
+
+  - id: myth-too-early
+    pillar: myth
+    title: "Myth: it's too early to prepare"
+    hook: '"Abhi toh **bahut time** hai"'
+    myth: AI shopping 5 saal baad aayega, abhi kuch karne ki zaroorat nahi
+    fact: Agentic payments India mein **2026 mein hi live** ho gaye. Jo pehle ready hoga, woh **aage** rahega.
+    point: Data saaf karna **free** hai. Der karna **mehenga**.
+    linkedin: |
+      "AI shopping is years away." In India, agentic payments went live with Razorpay and NPCI in February 2026, and Pine Labs launched an agent payment protocol on UPI in June.
+
+      Cleaning your product data costs nothing but time. Waiting costs you the head start.
+
+  - id: news-ai-content-labels
+    pillar: news
+    title: India's new rules on AI-generated content
+    hook: AI se bani **photo/video** par ab label zaroori
+    news: India ke IT Rules amendment (Feb 2026) ke tahat platforms ko **AI-generated content label** karna hota hai.
+    point: AI se product photos bana rahe ho? **Transparent raho.**
+    heading: Seller ke liye
+    items: ["AI-generated images ko **honestly** use karo", "Real product ki **asli photo** bhi do", "Platform ke **labels** mat hatao"]
+    linkedin: |
+      India's IT Rules amendment, in force since February 2026, brings "synthetically generated information" under platform rules: AI-generated images and videos must be labelled.
+
+      If you use AI to create product visuals, be transparent. Show real photos of the actual product too, and don't strip platform labels. Trust is the whole game in AI shopping.
+
+  - id: recap-30-days
+    pillar: tip
+    title: "30 days of lessons: the AI-ready store in one list"
+    hook: 30 din ki seekh, **ek list** mein
+    heading: AI-ready store
+    items:
+      - Clear **titles** aur poori details
+      - Price, stock, size **text** mein
+      - Delivery, **COD**, returns saaf
+      - Har jagah **same price**
+      - FAQs aur **reviews**
+    point: Yeh sab **aaj shuru** kar sakte ho, bina kisi tool ke
+    linkedin: |
+      30 days of AI-shopping lessons for Indian sellers, in one list:
+
+      - Clear titles and complete details
+      - Price, stock and size written as text
+      - Delivery, COD and returns stated plainly
+      - The same price everywhere
+      - FAQs and reviews on every product
+
+      You can start all of this today, without any tool. Save this for later.
