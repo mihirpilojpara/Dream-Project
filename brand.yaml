@@ -9,6 +9,9 @@ rules:
   # Turn this off only when we have something live to point to.
   no_links: true
 
+# How **highlighted** words look: color (accent colour only) | underline (plus a clean line below)
+highlight: color
+
 colors:
   bg_top: "#0B1020"      # background gradient (top)
   bg_bottom: "#141B3A"   # background gradient (bottom)
