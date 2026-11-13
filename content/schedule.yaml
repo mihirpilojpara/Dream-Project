@@ -1,0 +1,20 @@
+# Daily content calendar.
+# Day 1 posts topic #1 from content/bank/topics.yaml, day 2 posts topic #2, and so on.
+# GitHub renders today's content automatically every morning (.github/workflows/daily.yml).
+
+start_date: 2026-11-16          # first posting day (YYYY-MM-DD)
+timezone: Asia/Kolkata
+
+# A Sunday YouTube video (16:9) that stitches the week's lessons together.
+weekly_youtube_day: sunday
+
+# What happens when every topic has been used: repeat | stop
+when_bank_runs_out: repeat
+
+# Post a specific topic on a specific day (e.g. for breaking news):
+overrides: {}
+#  2026-11-20: news-upi-agent-payments
+
+# Days with no post:
+skip: []
+#  - 2026-12-25

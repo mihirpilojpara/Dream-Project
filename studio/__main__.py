@@ -4,19 +4,26 @@
   python -m studio render content/ep01.yaml --only reel
   python -m studio preview content/ep01.yaml --format youtube --scene 3
   python -m studio new "Why COD matters for AI shopping"
+  python -m studio daily                      # today's scheduled post (from content/bank)
+  python -m studio daily --date 2026-11-16 --days 7
+  python -m studio plan                       # posting calendar
+  python -m studio topic stat-92-percent      # one topic by id
 """
 
 import argparse
+import datetime as dt
 import re
 import sys
 import time
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import yaml
 
 from .brand import ROOT, load_brand
 from .linkedin import render_carousel, write_publish_notes
 from .rules import enforce
+from .compose import compose, compose_weekly, is_weekly_day, load_bank, load_schedule, topic_for
 from .video import render_still, render_video
 
 FORMAT_NAMES = {"youtube": "YouTube (16:9)", "reel": "Reel / Short (9:16)", "square": "Square post (1:1)"}
@@ -48,13 +55,17 @@ def _audio_for(script, fmt):
 def cmd_render(args):
     brand = load_brand(args.brand)
     script = load_script(args.script)
+    render_all(brand, script, Path(args.out) / script["slug"], only=args.only, no_video=args.no_video)
+
+
+def render_all(brand, script, out, only=None, no_video=False):
     enforce(brand, script)
-    out = Path(args.out) / script["slug"]
-    formats = [args.only] if args.only else script.get("formats", ["reel", "youtube"])
+    out = Path(out)
+    formats = [only] if only else script.get("formats", ["reel", "youtube"])
     fps = int(script.get("fps", 30))
     t0 = time.time()
     print(f"Rendering '{script.get('title', script['slug'])}' -> {out}")
-    if not args.no_video:
+    if not no_video:
         for fmt in formats:
             if fmt not in FORMAT_NAMES:
                 print(f"  ! unknown format '{fmt}', skipping")
@@ -62,12 +73,80 @@ def cmd_render(args):
             tl = render_video(brand, fmt, script, out / f"{fmt}.mp4", fps=fps, audio=_audio_for(script, fmt))
             cover = render_still(brand, fmt, script, out / f"{fmt}-cover.png", scene_index=0)
             print(f"  ok {FORMAT_NAMES[fmt]}: {tl.total:.1f}s video + cover {cover.name}")
-    if not args.only or args.only == "linkedin":
+    if (not only or only == "linkedin") and script.get("linkedin") is not False:
         pdf, n = render_carousel(brand, script, out / "linkedin")
         print(f"  ok LinkedIn carousel: {n} slides + {pdf.name}")
     notes = write_publish_notes(script, out)
     print(f"  ok captions & post text: {notes.name}")
     print(f"Done in {time.time() - t0:.0f}s")
+
+
+def _today(schedule):
+    return dt.datetime.now(ZoneInfo(schedule.get("timezone", "Asia/Kolkata"))).date()
+
+
+def _save_script(script, out):
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "script.yaml").write_text(yaml.safe_dump(script, allow_unicode=True, sort_keys=False, width=110),
+                                     encoding="utf-8")
+
+
+def cmd_daily(args):
+    """Render the scheduled content for a date (default: today) and N following days."""
+    brand = load_brand(args.brand)
+    topics = load_bank()
+    schedule = load_schedule()
+    start = dt.date.fromisoformat(args.date) if args.date else _today(schedule)
+    for k in range(args.days):
+        date = start + dt.timedelta(days=k)
+        n, topic = topic_for(date, topics, schedule)
+        if topic is None:
+            print(f"{date}: nothing scheduled" + (" (before start_date)" if n is None else ""))
+        else:
+            script = compose(topic, brand, n)
+            out = Path(args.out) / "daily" / f"{date}-{topic['id']}"
+            _save_script(script, out)
+            render_all(brand, script, out, no_video=args.no_video)
+        if is_weekly_day(date, schedule) and not args.no_weekly:
+            weekly = compose_weekly(date, topics, schedule, brand)
+            if weekly:
+                out = Path(args.out) / "daily" / f"{date}-{weekly['slug']}"
+                _save_script(weekly, out)
+                weekly["linkedin"] = False
+                render_all(brand, weekly, out, no_video=args.no_video)
+
+
+def cmd_topic(args):
+    """Render one topic from the bank by id (any day)."""
+    brand = load_brand(args.brand)
+    topics = {t["id"]: t for t in load_bank()}
+    if args.id not in topics:
+        sys.exit(f"Unknown topic '{args.id}'. Run: python -m studio plan --all")
+    script = compose(topics[args.id], brand, 0)
+    if args.youtube:
+        script["formats"] = ["reel", "youtube"]
+    out = Path(args.out) / "topics" / args.id
+    _save_script(script, out)
+    render_all(brand, script, out, no_video=args.no_video)
+
+
+def cmd_plan(args):
+    """Print the posting calendar."""
+    topics = load_bank()
+    schedule = load_schedule()
+    if args.all:
+        for i, t in enumerate(topics, 1):
+            print(f"{i:3}. [{t.get('pillar', '-'):<8}] {t['id']:<28} {t['title']}")
+        return
+    start = dt.date.fromisoformat(args.date) if args.date else max(_today(schedule), schedule["start_date"])
+    print(f"Bank: {len(topics)} topics · start {schedule['start_date']} · weekly YouTube on "
+          f"{schedule['weekly_youtube_day']}s\n")
+    for k in range(args.days):
+        d = start + dt.timedelta(days=k)
+        _, t = topic_for(d, topics, schedule)
+        extra = "  + weekly YouTube" if is_weekly_day(d, schedule) else ""
+        label = f"[{t.get('pillar', '-'):<8}] {t['title']}" if t else "-"
+        print(f"{d} {d.strftime('%a')}  {label}{extra}")
 
 
 def cmd_preview(args):
@@ -170,6 +249,27 @@ def main():
     p.add_argument("--scene", type=int, default=None, help="0-based scene index (default: all)")
     p.add_argument("--out", default="output")
     p.set_defaults(fn=cmd_preview)
+
+    dl = sub.add_parser("daily", help="render today's scheduled content (from the topic bank)")
+    dl.add_argument("--date", help="YYYY-MM-DD (default: today in schedule timezone)")
+    dl.add_argument("--days", type=int, default=1, help="also render the following N-1 days")
+    dl.add_argument("--no-video", action="store_true")
+    dl.add_argument("--no-weekly", action="store_true", help="skip the weekly YouTube compilation")
+    dl.add_argument("--out", default="output")
+    dl.set_defaults(fn=cmd_daily)
+
+    tp = sub.add_parser("topic", help="render one topic from the bank by id")
+    tp.add_argument("id")
+    tp.add_argument("--youtube", action="store_true", help="also render a 16:9 version")
+    tp.add_argument("--no-video", action="store_true")
+    tp.add_argument("--out", default="output")
+    tp.set_defaults(fn=cmd_topic)
+
+    pl = sub.add_parser("plan", help="show the posting calendar")
+    pl.add_argument("--date")
+    pl.add_argument("--days", type=int, default=14)
+    pl.add_argument("--all", action="store_true", help="list every topic in the bank")
+    pl.set_defaults(fn=cmd_plan)
 
     n = sub.add_parser("new", help="create a new episode script from a template")
     n.add_argument("title")

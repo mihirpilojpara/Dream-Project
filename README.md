@@ -50,7 +50,35 @@ python -m studio render content/ep01-is-your-shop-ai-ready.yaml --only reel
 
 Everything lands in `output/<episode-slug>/`.
 
-## 3. Writing a script
+## 3. Daily content on autopilot
+
+You don't write a new script every day. Ideas live in a **content bank** and a **calendar** decides what goes out each day:
+
+| File | What it is |
+|---|---|
+| `content/bank/topics.yaml` | 31 ready topics (news, myths, tips, AI demos, stats, building-in-public). Add more any time. |
+| `content/schedule.yaml` | Start date, days to skip, topics pinned to a date (for breaking news), and the weekly YouTube day |
+| `studio/compose.py` | Turns a topic into a full Reel/Short, LinkedIn carousel and captions, rotating formats and CTAs |
+
+```bash
+python -m studio plan                         # what posts on which day (next 14 days)
+python -m studio plan --all                   # every topic in the bank
+python -m studio daily                        # render today's post
+python -m studio daily --date 2026-11-16 --days 7   # render a whole week ahead
+python -m studio topic stat-92-percent --youtube    # render any topic on demand
+```
+
+Every day you get `output/daily/<date>-<topic>/` with `reel.mp4`, `reel-cover.png`, `linkedin/carousel.pdf`, `publish.md` (ready-to-paste captions)
+and `script.yaml` (the generated script, if you want to tweak and re-render it).
+On **Sundays** you also get a ~2-minute 16:9 **YouTube** video stitching the week's lessons together.
+
+**Fully automatic:** `.github/workflows/daily.yml` renders today's content on GitHub every morning at 05:30 IST.
+Open **Actions → Daily content → latest run**: the captions are on the summary page and the videos are under **Artifacts**.
+Your only daily job is to post them (about 5 minutes).
+
+To add a topic, append it to `content/bank/topics.yaml`. Only `id`, `title` and `hook` are required. The comments at the top of the file list every optional field.
+
+## 4. Writing a script by hand
 
 A script is a YAML file in `content/`. Each scene is one animated "slide". Words in `**double stars**` get the accent colour and a highlighter.
 
@@ -97,18 +125,18 @@ Add a `linkedin:` section with your `post` text and a `carousel` list of slides 
 If you leave out `carousel`, slides are built automatically from your scenes.
 Upload `carousel.pdf` to LinkedIn as a **document** so it becomes a swipeable carousel.
 
-## 4. Your brand
+## 5. Your brand
 
 Edit `brand.yaml` to change the name, handle, colours and fonts. Every video and slide updates automatically.
 
-## 5. Content rule: no links (yet)
+## 6. Content rule: no links (yet)
 
 Nothing is live yet, so our content builds attention and never sends people anywhere.
 With `rules: no_links: true` in `brand.yaml`, the studio refuses to render a script that contains a website, "visit",
 "link in bio", "sign up", "waitlist" or "buy now". Use **Follow**, **Comment** and **Save this** instead.
 Social handles like `@agentready.in` are fine. Switch the rule off only when something is actually live.
 
-## 6. Branches & how we work
+## 7. Branches & how we work
 
 We never commit to `main` or directly to the long-lived branches. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -126,9 +154,12 @@ feature/*    <- one branch per piece of work, opened as a PR into development
 
 ```
 brand.yaml               your colours, fonts, handle
-content/                 one YAML script per episode
+content/bank/            topic bank: the ideas behind every daily post
+content/schedule.yaml    posting calendar
+content/                 hand-written episode scripts
 studio/
-  __main__.py            command line (render / preview / new)
+  __main__.py            command line (daily / plan / topic / render / preview / new)
+  compose.py             topic bank -> script, calendar, weekly YouTube compilation
   scenes.py              scene types (hook, chat, stat, compare...)
   video.py               frame-by-frame renderer -> ffmpeg -> MP4
   linkedin.py            carousel PDF + captions file
@@ -141,6 +172,8 @@ assets/music, voice      your audio files
 ## Roadmap
 
 - [x] Content studio: Reels, Shorts, YouTube, LinkedIn from one script
+- [x] Daily content from a topic bank + calendar, weekly YouTube compilation
+- [ ] Auto-posting to Instagram, YouTube and LinkedIn (needs each platform's API access)
 - [ ] More scene types: product-card, phone mockup, timeline, quote
 - [ ] Auto-captions from a voiceover
 - [ ] **AgentReady checker**: scan a store and score how readable it is to AI agents
