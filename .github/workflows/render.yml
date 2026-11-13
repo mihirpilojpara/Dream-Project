@@ -1,0 +1,41 @@
+# Renders your content on GitHub's servers whenever you push a script in content/.
+# Download the finished videos from: Actions tab -> latest run -> "Artifacts".
+name: Render content
+
+on:
+  push:
+    branches: [development, qa, production, "feature/**", "fix/**"]
+    paths:
+      - "content/**"
+      - "studio/**"
+      - "brand.yaml"
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Script to render (e.g. content/ep01-is-your-shop-ai-ready.yaml). Leave empty for all."
+        required: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and Python packages
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt
+      - name: Render
+        run: |
+          if [ -n "${{ github.event.inputs.script }}" ]; then
+            python -m studio render "${{ github.event.inputs.script }}"
+          else
+            for f in content/*.yaml; do python -m studio render "$f"; done
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rendered-content
+          path: output/
+          retention-days: 14
